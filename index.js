@@ -10,6 +10,9 @@ const typeDefs = `#graphql
         name: String
         books: [Book]
     }
+    type Mutation {
+        addBook(title: String, author: String): Book
+    }
     type Query {
         books: [Book]
         authors: [Author]    
