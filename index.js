@@ -14,6 +14,10 @@ const typeDefs = `#graphql
         title: String
         body: String
     }
+    type Country {
+        name: String
+        code: String
+    }
     input BlogPostContent {
         title: String
         body: String
@@ -40,6 +44,7 @@ const typeDefs = `#graphql
     type Query {
         books: [Book]
         authors: [Author]
+        countries: [Country]
         favoriteColor: AllowedColor
         avatar(borderColor: AllowedColor): String
     }
@@ -60,6 +65,32 @@ const books = [
         title: 'City of Glass',
     }
 ];
+const countries = [
+    {
+        name: 'Andora',      
+        code: 'AD',      
+    },
+    {
+        name: 'France',
+        code: 'FR'
+    },
+    {
+        name: 'Finland',
+        code: 'FL'
+    },
+    {
+        name: 'Romania',
+        code: 'RM'
+    },
+    {
+        name: 'Russia',
+        code: 'RU'
+    },
+    {
+        name: 'Ukraine',
+        code: 'UA',
+    }
+];
 const resolvers = {
     AllowedColor: {
         RED: '#f00',
@@ -69,7 +100,8 @@ const resolvers = {
     Query: {
         favoriteColor: () => '#f00',
         books: () => books,
-        authors: ()=> authors
+        authors: ()=> authors,
+        countries: () => countries,
     }
 };
 const server = new ApolloServer({
