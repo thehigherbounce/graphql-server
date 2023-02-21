@@ -12,8 +12,13 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@apollo/datasource-rest": "^5.0.2",
     "@apollo/server": "^4.4.0",
-    "graphql": "^16.6.0"
+    "eslint-config-next": "^13.1.6",
+    "graphql": "^16.6.0",
+    "next": "^13.1.6",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.20"
