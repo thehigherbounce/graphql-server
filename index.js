@@ -10,9 +10,38 @@ const typeDefs = `#graphql
         name: String
         books: [Book]
     }
+    type Post {
+        title: String
+        body: String
+    }
+    input BlogPostContent {
+        title: String
+        body: String
+        media: [MediaDetails!]
+    }
+    input MediaDetails{
+        format: MediaFormat!
+        url: String!
+    }
+    enum MediaFormat{
+        IMAGE
+        VIDEO
+    }
+    enum AllowedColor {
+        RED
+        GREEN
+        BLUE
+    }
+    type Mutation {
+        addBook(title: String, author: String): Book
+        createBlogPost(content: BlogPostContent!): Post
+        updateBlogPost(id: ID!, content: BlogPostContent!): Post
+    }
     type Query {
         books: [Book]
-        authors: [Author]    
+        authors: [Author]
+        favoriteColor: AllowedColor
+        avatar(borderColor: AllowedColor): String
     }
 `;
 const authors = [
@@ -26,15 +55,19 @@ const authors = [
 const books = [
     {
         title: 'The Awakening',
-        author: authors[0]
     },
     {
         title: 'City of Glass',
-        author: authors[1]
     }
 ];
 const resolvers = {
+    AllowedColor: {
+        RED: '#f00',
+        GREEN: '#0f0',
+        BLUE: '#00f',
+    },
     Query: {
+        favoriteColor: () => '#f00',
         books: () => books,
         authors: ()=> authors
     }
@@ -42,10 +75,17 @@ const resolvers = {
 const server = new ApolloServer({
     typeDefs,
     resolvers,
-});
+    context: ({req}) => {
+        const token = req.headers.authorizaton || ''
 
+        const user = getUser(token)
+
+        return { user }
+    }
+});
 const { url } = await startStandaloneServer(server, {
     listent: {port: 4000}
 });
+
 
 console.log(`Server ready at: ${url}`)
