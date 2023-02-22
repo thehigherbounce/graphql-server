@@ -1,123 +1,30 @@
-import { ApolloServer } from '@apollo/server';
-import { startStandaloneServer } from '@apollo/server/standalone';
+import { ApolloServer } from "@apollo/server";
+import { expressMiddleware } from '@apollo/server/express4';
+import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
+import express from 'express';
+import http from 'http';
+import cors from 'cors';
+import { typeDefs, resolvers } from './schema/index.js';
+import bodyParser from "body-parser";
 
-const typeDefs = `#graphql
-    type Book {
-        title: String
-        author: Author
-    }
-    type Author {
-        name: String
-        books: [Book]
-    }
-    type Post {
-        title: String
-        body: String
-    }
-    type Country {
-        name: String
-        code: String
-    }
-    input BlogPostContent {
-        title: String
-        body: String
-        media: [MediaDetails!]
-    }
-    input MediaDetails{
-        format: MediaFormat!
-        url: String!
-    }
-    enum MediaFormat{
-        IMAGE
-        VIDEO
-    }
-    enum AllowedColor {
-        RED
-        GREEN
-        BLUE
-    }
-    type Mutation {
-        addBook(title: String, author: String): Book
-        createBlogPost(content: BlogPostContent!): Post
-        updateBlogPost(id: ID!, content: BlogPostContent!): Post
-    }
-    type Query {
-        books: [Book]
-        authors: [Author]
-        countries: [Country]
-        favoriteColor: AllowedColor
-        avatar(borderColor: AllowedColor): String
-    }
-`;
-const authors = [
-    {
-        name: 'Kate Chopin',
-    },
-    {
-        name: 'Paul Auster',
-    }
-];
-const books = [
-    {
-        title: 'The Awakening',
-    },
-    {
-        title: 'City of Glass',
-    }
-];
-const countries = [
-    {
-        name: 'Andora',      
-        code: 'AD',      
-    },
-    {
-        name: 'France',
-        code: 'FR'
-    },
-    {
-        name: 'Finland',
-        code: 'FL'
-    },
-    {
-        name: 'Romania',
-        code: 'RM'
-    },
-    {
-        name: 'Russia',
-        code: 'RU'
-    },
-    {
-        name: 'Ukraine',
-        code: 'UA',
-    }
-];
-const resolvers = {
-    AllowedColor: {
-        RED: '#f00',
-        GREEN: '#0f0',
-        BLUE: '#00f',
-    },
-    Query: {
-        favoriteColor: () => '#f00',
-        books: () => books,
-        authors: ()=> authors,
-        countries: () => countries,
-    }
-};
+const app = express();
+const httpServer = http.createServer(app);
+
 const server = new ApolloServer({
     typeDefs,
     resolvers,
-    context: ({req}) => {
-        const token = req.headers.authorizaton || ''
-
-        const user = getUser(token)
-
-        return { user }
-    }
-});
-const { url } = await startStandaloneServer(server, {
-    listent: {port: 4000}
+    plugins: [ApolloServerPluginDrainHttpServer({httpServer})],
 });
 
+await server.start();
+app.use(
+    '/',
+    cors(),
+    bodyParser.json({limit: '50mb'}),
+    expressMiddleware(server, {
+        context: async ({req}) => ({token: req.headers.token}),
+    }),
+);
 
-console.log(`Server ready at: ${url}`)
+await new Promise((resolve) => httpServer.listen({port: 4000}, resolve));
+console.log(`Server ready at http://localhost:4000`)
