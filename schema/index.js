@@ -1,27 +1,23 @@
-import { countries } from "./data.js";
 export const typeDefs = `#graphql
     type Book {
         title: String
         author: Author
     }
+    type Customer {
+        _id: ID!
+        firstName: String
+        lastName: String
+        address: String
+        uint: String
+    }
     type Author {
         name: String
-        books: [Book]
-    }
-    type Country {
-        name: String
-        code: String
     }
     type Query {
         books: [Book]
-        authors: [Author]
-        countries: [Country]
+        customers: [Customer]
+    }
+    type Mutation {
+        createCustomer(firstName: String!, lastName:String!, address:String!,uint:String):Customer!
     }
 `;
-export const resolvers = {
-    Query: {
-        books: () => books,
-        countries: () => countries,
-        authors: () => authors,
-    }
-}
